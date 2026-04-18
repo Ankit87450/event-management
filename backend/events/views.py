@@ -190,28 +190,52 @@ def attendee_detail(request):
         }
     })
 
-
-@csrf_exempt
-@require_http_methods(['POST'])
+@require_http_methods(["POST"])
 def validate_attendee(request):
     try:
-        data    = json.loads(request.body)
-        user_id = data.get('id')
-        if not user_id:
-            return JsonResponse({'status': False, 'error': 'Attendee ID is required.'}, status=400)
+        data = json.loads(request.body)
+        attendee_id = data.get('id')
+        mode = data.get('mode', 'entry')
 
-        user = Management.objects.filter(id=user_id).first()
-        if not user:
-            return JsonResponse({'status': False, 'error': 'Attendee not found.'}, status=404)
+        attendee = Management.objects.get(id=attendee_id)
 
-        if user.status == 'VALIDATED':
-            return JsonResponse({'status': False, 'error': 'Attendee has already been validated.'}, status=409)
+        if mode == 'entry':
+            already = attendee.registration_status == 'validated'
+            attendee.registration_status = 'validated'
+            attendee.save()
+            return JsonResponse({
+                'status': True,
+                'mode': 'entry',
+                'already_used': already,
+            })
 
-        user.status = 'VALIDATED'
-        user.save()
-        logger.info(f'Attendee validated: ID={user_id}')
-        return JsonResponse({'status': True, 'message': 'Attendee validated successfully.'})
+        elif mode == 'meal':
+            already = attendee.meal_taken
+            attendee.meal_taken = True
+            attendee.save()
+            return JsonResponse({
+                'status': True,
+                'mode': 'meal',
+                'already_used': already,
+                'meal_preference': attendee.meal_preference,
+            })
 
-    except Exception:
-        logger.exception('Validation error')
-        return JsonResponse({'status': False, 'error': 'An unexpected server error occurred.'}, status=500)
+        elif mode == 'parking':
+            already = attendee.parking_taken
+            attendee.parking_taken = True
+            attendee.save()
+            return JsonResponse({
+                'status': True,
+                'mode': 'parking',
+                'already_used': already,
+                'parking_facility': attendee.parking_facility,
+            })
+
+        else:
+            return JsonResponse({'status': False, 'error': 'Invalid mode'}, status=400)
+
+    except Management.DoesNotExist:
+        return JsonResponse({'status': False, 'error': 'Attendee not found'}, status=404)
+    except Exception as e:
+        logger.error(f'Validation error: {e}')
+        return JsonResponse({'status': False, 'error': str(e)}, status=500)
