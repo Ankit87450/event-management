@@ -130,7 +130,6 @@ export default function ScannerPage() {
         setError('Failed to start camera. Please ensure no other app is using the camera.');
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleScanSuccess = useCallback(async (text) => {
@@ -138,7 +137,6 @@ export default function ScannerPage() {
     lastScan.current = text;
     await stopScanner();
     parseAndProcess(text);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopScanner]);
 
   const parseAndProcess = useCallback((text) => {
@@ -168,7 +166,6 @@ export default function ScannerPage() {
     }
 
     fetchAndValidate(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAndValidate = useCallback(async (id) => {
