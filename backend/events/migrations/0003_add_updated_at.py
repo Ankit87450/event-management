@@ -9,17 +9,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            sql="""
-                ALTER TABLE event_management 
-                ALTER COLUMN updated_at SET DEFAULT NOW();
-                
-                UPDATE event_management 
-                SET updated_at = created_at 
-                WHERE updated_at IS NULL;
-                
-                ALTER TABLE event_management 
-                ALTER COLUMN updated_at SET NOT NULL;
-            """,
+            sql="UPDATE event_management SET updated_at = created_at WHERE updated_at IS NULL;",
             reverse_sql=migrations.RunSQL.noop,
         ),
     ]
