@@ -20,7 +20,6 @@ MOBILE_RE       = re.compile(r'^[6-9]\d{9}$')
 
 
 def _generate_qr(user, base_url='http://localhost:8000'):
-    """Generate vCard QR code with embedded attendee URL."""
     parts = (user.name or '').strip().split(' ', 1)
     first = parts[0]
     last  = parts[1] if len(parts) > 1 else ''
@@ -126,12 +125,22 @@ def event_registration(request):
 
         with transaction.atomic():
             event = Management.objects.create(
-                name=name, email=email, gender=gender, age=age,
-                attendee_type=attendee_type, designation=designation, company=company,
-                state=state, aadhaar_mobile=aadhaar_mobile, whatsapp_number=whatsapp_number,
-                meal_preference=meal_preference, parking_facility=parking_facility,
-                heard_about=heard_about, special_requirement=special_req,
-                photo_name=photo_name, photo_base64=photo_base64,
+                name=name,
+                email=email,
+                gender=gender,
+                age=age,
+                attendee_type=attendee_type,
+                designation=designation,
+                company=company,
+                state=state,
+                aadhaar_mobile=aadhaar_mobile,
+                whatsapp_number=whatsapp_number,
+                meal_preference=meal_preference,
+                parking_facility=parking_facility,
+                heard_about=heard_about,
+                special_requirement=special_req,
+                photo_name=photo_name,
+                photo_base64=photo_base64,
                 status='REGISTERED',
             )
 
@@ -190,7 +199,9 @@ def attendee_detail(request):
         }
     })
 
-@require_http_methods(["POST"])
+
+@csrf_exempt
+@require_http_methods(['POST'])
 def validate_attendee(request):
     try:
         data = json.loads(request.body)
@@ -200,8 +211,8 @@ def validate_attendee(request):
         attendee = Management.objects.get(id=attendee_id)
 
         if mode == 'entry':
-            already = attendee.registration_status == 'validated'
-            attendee.registration_status = 'validated'
+            already = attendee.status == 'VALIDATED'
+            attendee.status = 'VALIDATED'
             attendee.save()
             return JsonResponse({
                 'status': True,

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import './index.css';
 import RegistrationPage from './pages/RegistrationPage';
-import ScannerPage from './pages/ScannerPage';
 
 function Navbar() {
   const { pathname } = useLocation();
@@ -54,7 +53,6 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<RegistrationPage />} />
-        <Route path="/scanner" element={<ScannerPage />} />
       </Routes>
     </BrowserRouter>
   );

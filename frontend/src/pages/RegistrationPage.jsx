@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh',
@@ -26,21 +26,20 @@ const INITIAL_FORM = {
   email: '',
   gender: '',
   age: '',
-  attendeeType: '',
+  attendee_type: '',
   designation: '',
   company: '',
   state: '',
-  mobile: '',
-  whatsapp: '',
+  aadhaar_mobile: '',
+  whatsapp_number: '',
   sameAsMobile: false,
-  mealPreference: '',
-  parkingRequired: '',
-  heardFrom: '',
-  specialRequirement: '',
+  meal_preference: '',
+  parking_facility: '',
+  heard_about: '',
+  special_requirement: '',
   photo: null,
 };
 
-// ── Styles ──────────────────────────────────────────────────────
 const styles = {
   page: {
     minHeight: 'calc(100vh - 60px)',
@@ -131,7 +130,6 @@ const styles = {
     border: '1.5px solid #d1d5db',
     borderRadius: 10,
     overflow: 'hidden',
-    transition: 'border-color 0.2s',
   },
   phoneFlag: {
     display: 'flex',
@@ -211,7 +209,6 @@ const styles = {
     borderRadius: 12,
     cursor: 'pointer',
     alignItems: 'center',
-    transition: 'border-color 0.2s, background 0.2s',
     background: '#fafafa',
   },
   photoPreview: {
@@ -235,11 +232,9 @@ const styles = {
     cursor: 'pointer',
     marginTop: 8,
     letterSpacing: '0.2px',
-    transition: 'background 0.2s, transform 0.1s',
   },
 };
 
-// ── Field Wrapper ───────────────────────────────────────────────
 function Field({ label, required, error, hint, children }) {
   return (
     <div style={styles.row}>
@@ -260,7 +255,6 @@ function Field({ label, required, error, hint, children }) {
   );
 }
 
-// ── Success Modal ────────────────────────────────────────────────
 function SuccessModal({ result, photoPreview, onClose }) {
   const passRef = useRef();
 
@@ -311,7 +305,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
         maxHeight: '90vh',
         overflowY: 'auto',
       }}>
-        {/* Close button */}
         <button
           onClick={onClose}
           style={{
@@ -336,7 +329,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
           ✕
         </button>
 
-        {/* Success header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
             width: 60,
@@ -362,7 +354,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
           </p>
         </div>
 
-        {/* Pass card */}
         <div
           ref={passRef}
           style={{
@@ -376,7 +367,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
             marginBottom: 20,
           }}
         >
-          {/* QR Code */}
           <div style={{
             border: '3px solid #083459',
             borderRadius: 14,
@@ -395,7 +385,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
             }
           </div>
 
-          {/* Event Pass */}
           <div style={{
             background: 'linear-gradient(160deg, #0f3460, #083459)',
             color: '#fff',
@@ -449,10 +438,7 @@ function SuccessModal({ result, photoPreview, onClose }) {
           Scan with a regular camera to save contact · Scan with EventScan app to validate entry
         </p>
 
-        <button
-          onClick={downloadPass}
-          style={{ ...styles.submitBtn, background: '#083459' }}
-        >
+        <button onClick={downloadPass} style={styles.submitBtn}>
           Download Event Pass
         </button>
       </div>
@@ -460,7 +446,6 @@ function SuccessModal({ result, photoPreview, onClose }) {
   );
 }
 
-// ── Main Registration Page ──────────────────────────────────────
 export default function RegistrationPage() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -472,10 +457,10 @@ export default function RegistrationPage() {
   const updateField = useCallback((name, value) => {
     setForm(prev => {
       const next = { ...prev, [name]: value };
-      if (name === 'mobile' && prev.sameAsMobile) next.whatsapp = value;
-      if (name === 'sameAsMobile' && value) next.whatsapp = prev.mobile;
-      if (name === 'sameAsMobile' && !value) next.whatsapp = '';
-      if (name === 'attendeeType' && value !== 'working_professional') {
+      if (name === 'aadhaar_mobile' && prev.sameAsMobile) next.whatsapp_number = value;
+      if (name === 'sameAsMobile' && value) next.whatsapp_number = prev.aadhaar_mobile;
+      if (name === 'sameAsMobile' && !value) next.whatsapp_number = '';
+      if (name === 'attendee_type' && value !== 'working_professional') {
         next.designation = '';
         next.company = '';
       }
@@ -495,7 +480,7 @@ export default function RegistrationPage() {
       updateField(name, checked);
       return;
     }
-    if (name === 'mobile' || name === 'whatsapp') {
+    if (name === 'aadhaar_mobile' || name === 'whatsapp_number') {
       updateField(name, value.replace(/\D/g, '').slice(0, 10));
       return;
     }
@@ -536,6 +521,7 @@ export default function RegistrationPage() {
 
   const validate = useCallback(() => {
     const e = {};
+
     if (!form.name.trim()) e.name = 'Full name is required.';
     else if (form.name.trim().length < 2) e.name = 'Name must be at least 2 characters.';
 
@@ -547,23 +533,23 @@ export default function RegistrationPage() {
     if (!form.age) e.age = 'Age is required.';
     else if (Number(form.age) < 12 || Number(form.age) > 65) e.age = 'Age must be between 12 and 65.';
 
-    if (!form.attendeeType) e.attendeeType = 'Please select an attendee type.';
+    if (!form.attendee_type) e.attendee_type = 'Please select an attendee type.';
 
-    if (form.attendeeType === 'working_professional') {
+    if (form.attendee_type === 'working_professional') {
       if (!form.designation.trim()) e.designation = 'Designation is required for working professionals.';
       if (!form.company.trim()) e.company = 'Company name is required for working professionals.';
     }
 
     if (!form.state) e.state = 'Please select your state.';
 
-    if (!form.mobile) e.mobile = 'Mobile number is required.';
-    else if (!/^[6-9]\d{9}$/.test(form.mobile)) e.mobile = 'Enter a valid 10-digit Indian mobile number.';
+    if (!form.aadhaar_mobile) e.aadhaar_mobile = 'Mobile number is required.';
+    else if (!/^[6-9]\d{9}$/.test(form.aadhaar_mobile)) e.aadhaar_mobile = 'Enter a valid 10-digit Indian mobile number.';
 
-    if (!form.whatsapp) e.whatsapp = 'WhatsApp number is required.';
-    else if (!/^[6-9]\d{9}$/.test(form.whatsapp)) e.whatsapp = 'Enter a valid 10-digit Indian mobile number.';
+    if (!form.whatsapp_number) e.whatsapp_number = 'WhatsApp number is required.';
+    else if (!/^[6-9]\d{9}$/.test(form.whatsapp_number)) e.whatsapp_number = 'Enter a valid 10-digit Indian mobile number.';
 
-    if (!form.mealPreference) e.mealPreference = 'Please select your meal preference.';
-    if (!form.parkingRequired) e.parkingRequired = 'Please indicate if you require parking.';
+    if (!form.meal_preference) e.meal_preference = 'Please select your meal preference.';
+    if (!form.parking_facility) e.parking_facility = 'Please indicate if you require parking.';
     if (!form.photo) e.photo = 'A profile photo is required.';
 
     setErrors(e);
@@ -572,12 +558,7 @@ export default function RegistrationPage() {
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    if (!validate()) {
-      // Scroll to first error
-      const firstError = document.querySelector('[data-error="true"]');
-      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
+    if (!validate()) return;
 
     setSubmitting(true);
     try {
@@ -586,16 +567,16 @@ export default function RegistrationPage() {
       fd.append('email', form.email.trim().toLowerCase());
       fd.append('gender', form.gender);
       fd.append('age', form.age);
-      fd.append('attendee_type', form.attendeeType);
+      fd.append('attendee_type', form.attendee_type);
       fd.append('designation', form.designation.trim());
       fd.append('company', form.company.trim());
       fd.append('state', form.state);
-      fd.append('aadhaar_mobile', form.mobile);
-      fd.append('whatsapp_number', form.whatsapp);
-      fd.append('meal_preference', form.mealPreference);
-      fd.append('parking_facility', form.parkingRequired);
-      fd.append('heard_about', form.heardFrom);
-      fd.append('special_requirement', form.specialRequirement.trim());
+      fd.append('aadhaar_mobile', form.aadhaar_mobile);
+      fd.append('whatsapp_number', form.whatsapp_number);
+      fd.append('meal_preference', form.meal_preference);
+      fd.append('parking_facility', form.parking_facility);
+      fd.append('heard_about', form.heard_about);
+      fd.append('special_requirement', form.special_requirement.trim());
       if (form.photo) fd.append('photo', form.photo);
 
       const res = await fetch(`${API}/register/`, { method: 'POST', body: fd });
@@ -607,7 +588,7 @@ export default function RegistrationPage() {
         setErrors({ _server: data.error || 'Registration failed. Please try again.' });
       }
     } catch {
-      setErrors({ _server: 'Unable to connect to the server. Please check your internet connection and try again.' });
+      setErrors({ _server: 'Unable to connect to the server. Please check your connection and try again.' });
     } finally {
       setSubmitting(false);
     }
@@ -639,13 +620,11 @@ export default function RegistrationPage() {
       )}
 
       <div style={styles.card}>
-        {/* Header */}
         <div style={styles.header}>
           <h1 style={styles.title}>Participant Registration</h1>
           <p style={styles.subtitle}>Complete the form below to register for the event</p>
         </div>
 
-        {/* Server error */}
         {errors._server && (
           <div style={{
             padding: '14px 18px',
@@ -661,6 +640,7 @@ export default function RegistrationPage() {
         )}
 
         <form onSubmit={handleSubmit} noValidate autoComplete="off">
+
           {/* Personal Information */}
           <div style={styles.section}>
             <p style={styles.sectionTitle}>Personal Information</p>
@@ -673,7 +653,6 @@ export default function RegistrationPage() {
                 placeholder="Enter your full name"
                 style={inputStyle('name')}
                 autoComplete="off"
-                data-error={!!errors.name}
                 spellCheck={false}
               />
             </Field>
@@ -687,13 +666,12 @@ export default function RegistrationPage() {
                 placeholder="example@email.com"
                 style={inputStyle('email')}
                 autoComplete="off"
-                data-error={!!errors.email}
               />
             </Field>
 
             <div style={styles.grid2}>
               <Field label="Gender" required error={errors.gender}>
-                <div style={styles.radioGroup} data-error={!!errors.gender}>
+                <div style={styles.radioGroup}>
                   {['Male', 'Female'].map(g => (
                     <label key={g} style={styles.radioLabel}>
                       <input
@@ -787,12 +765,12 @@ export default function RegistrationPage() {
           <div style={styles.section}>
             <p style={styles.sectionTitle}>Professional Details</p>
 
-            <Field label="Attendee Type" required error={errors.attendeeType}>
+            <Field label="Attendee Type" required error={errors.attendee_type}>
               <select
-                name="attendeeType"
-                value={form.attendeeType}
+                name="attendee_type"
+                value={form.attendee_type}
                 onChange={handleChange}
-                style={selectStyle('attendeeType')}
+                style={selectStyle('attendee_type')}
               >
                 <option value="">Select attendee type</option>
                 <option value="student">Student</option>
@@ -801,7 +779,7 @@ export default function RegistrationPage() {
               </select>
             </Field>
 
-            {form.attendeeType === 'working_professional' && (
+            {form.attendee_type === 'working_professional' && (
               <div style={styles.grid2}>
                 <Field label="Designation" required error={errors.designation}>
                   <input
@@ -845,16 +823,16 @@ export default function RegistrationPage() {
           <div style={styles.section}>
             <p style={styles.sectionTitle}>Contact Information</p>
 
-            <Field label="Mobile Number" required error={errors.mobile} hint="10-digit Indian mobile number">
-              <div style={{ ...styles.phoneWrap, ...(errors.mobile ? { borderColor: '#ef4444' } : {}) }}>
+            <Field label="Mobile Number" required error={errors.aadhaar_mobile} hint="10-digit Indian mobile number">
+              <div style={{ ...styles.phoneWrap, ...(errors.aadhaar_mobile ? { borderColor: '#ef4444' } : {}) }}>
                 <div style={styles.phoneFlag}>
                   <span>🇮🇳</span>
                   <span>+91</span>
                 </div>
                 <input
-                  name="mobile"
+                  name="aadhaar_mobile"
                   type="tel"
-                  value={form.mobile}
+                  value={form.aadhaar_mobile}
                   onChange={handleChange}
                   placeholder="9876543210"
                   style={styles.phoneInput}
@@ -876,16 +854,16 @@ export default function RegistrationPage() {
             </label>
 
             <div style={{ marginTop: 16 }}>
-              <Field label="WhatsApp Number" required error={errors.whatsapp}>
-                <div style={{ ...styles.phoneWrap, ...(errors.whatsapp ? { borderColor: '#ef4444' } : {}) }}>
+              <Field label="WhatsApp Number" required error={errors.whatsapp_number}>
+                <div style={{ ...styles.phoneWrap, ...(errors.whatsapp_number ? { borderColor: '#ef4444' } : {}) }}>
                   <div style={styles.phoneFlag}>
                     <span>🇮🇳</span>
                     <span>+91</span>
                   </div>
                   <input
-                    name="whatsapp"
+                    name="whatsapp_number"
                     type="tel"
-                    value={form.whatsapp}
+                    value={form.whatsapp_number}
                     onChange={handleChange}
                     placeholder="9876543210"
                     style={{ ...styles.phoneInput, background: form.sameAsMobile ? '#f9fafb' : '#fff' }}
@@ -903,14 +881,14 @@ export default function RegistrationPage() {
           <div style={styles.section}>
             <p style={styles.sectionTitle}>Event Preferences</p>
 
-            <Field label="Meal Preference" required error={errors.mealPreference}>
+            <Field label="Meal Preference" required error={errors.meal_preference}>
               <div style={styles.radioGroup}>
                 <label style={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="mealPreference"
+                    name="meal_preference"
                     value="veg"
-                    checked={form.mealPreference === 'veg'}
+                    checked={form.meal_preference === 'veg'}
                     onChange={handleChange}
                   />
                   Vegetarian
@@ -918,9 +896,9 @@ export default function RegistrationPage() {
                 <label style={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="mealPreference"
+                    name="meal_preference"
                     value="non_veg"
-                    checked={form.mealPreference === 'non_veg'}
+                    checked={form.meal_preference === 'non_veg'}
                     onChange={handleChange}
                   />
                   Non-Vegetarian
@@ -928,14 +906,14 @@ export default function RegistrationPage() {
               </div>
             </Field>
 
-            <Field label="Parking Required?" required error={errors.parkingRequired}>
+            <Field label="Parking Required?" required error={errors.parking_facility}>
               <div style={styles.radioGroup}>
                 <label style={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="parkingRequired"
+                    name="parking_facility"
                     value="yes"
-                    checked={form.parkingRequired === 'yes'}
+                    checked={form.parking_facility === 'yes'}
                     onChange={handleChange}
                   />
                   Yes, I need parking
@@ -943,9 +921,9 @@ export default function RegistrationPage() {
                 <label style={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="parkingRequired"
+                    name="parking_facility"
                     value="no"
-                    checked={form.parkingRequired === 'no'}
+                    checked={form.parking_facility === 'no'}
                     onChange={handleChange}
                   />
                   No, I don't need parking
@@ -955,8 +933,8 @@ export default function RegistrationPage() {
 
             <Field label="How did you hear about this event?">
               <select
-                name="heardFrom"
-                value={form.heardFrom}
+                name="heard_about"
+                value={form.heard_about}
                 onChange={handleChange}
                 style={styles.select}
               >
@@ -969,8 +947,8 @@ export default function RegistrationPage() {
 
             <Field label="Special Requirements" hint="Dietary restrictions, accessibility needs, or any other requirements">
               <textarea
-                name="specialRequirement"
-                value={form.specialRequirement}
+                name="special_requirement"
+                value={form.special_requirement}
                 onChange={handleChange}
                 placeholder="Describe any special requirements (optional)..."
                 style={styles.textarea}
@@ -979,7 +957,6 @@ export default function RegistrationPage() {
             </Field>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={submitting}
